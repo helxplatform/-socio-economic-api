@@ -74,7 +74,7 @@ class SocioEconExposures(object):
                 query = session.query(census_obj.geoid). \
                                 filter(func.ST_Contains(census_obj.geom,
                                         func.ST_GeomFromText("POINT(" + str(lon) + " " + str(lat) + ")", 4269)))
-                result = session.execute(query)
+                result = session.execute(query, execution_options={"prebuffer_rows": True})
                 for query_return_values in result:
                     tmp_geoid = query_return_values[0]
 
@@ -94,7 +94,7 @@ class SocioEconExposures(object):
             query = session.query(census_obj.geoid). \
                             filter(func.ST_Contains(census_obj.geom,
                                    func.ST_GeomFromText("POINT(" + str(lon) + " " + str(lat) + ")", 4269)))
-            result = session.execute(query)
+            result = session.execute(query, execution_options={"prebuffer_rows": True})
             for query_return_values in result:
                 tmp_geoid = query_return_values[0]
 
@@ -116,7 +116,7 @@ class SocioEconExposures(object):
         query = session.query(SocioEconomicData2019). \
                                   options(load_only(*cols)). \
                                   filter(SocioEconomicData2019.bgid2016.like("%" + geoid[year]))
-        result = session.execute(query)
+        result = session.execute(query, execution_options={"prebuffer_rows": True})
 
         session.close()
         return result
@@ -152,18 +152,26 @@ class SocioEconExposures(object):
                 # change any null values to 'n/a'
                 new_query_return_list = []
                 for val in query_return_values:
+                    print("val=",val)
                     if(val is None):
                         new_query_return_list.append("n/a")
                     else:
                         new_query_return_list.append(val)
 
+                print("new_query_return_list=[", *new_query_return_list , "]", flush=True) 
                 tmp_dict = {key: val for key, val in zip(s.Socio_Econ_Data_Columns[year_key].values(), new_query_return_list)}
+                print("tmp_dict:", flush=True)
+                dict_items = tmp_dict.items()
+                for item in dict_items:
+                    print(item, flush=True)
+                print("end tmp_dict.", flush=True)
 
                 # fix some things up ...
                 # get rid of the id
                 del tmp_dict["id"]
                 # change format of geoid
-                tmp_dict["geoid"] = '15000US' + tmp_dict["geoid"]
+                if tmp_dict["geoid"] is not None:
+                    tmp_dict["geoid"] = '15000US' + tmp_dict["geoid"]
 
                 # add year range
                 for dkey, dvalue in s.Socio_Econ_Data_Years.items():

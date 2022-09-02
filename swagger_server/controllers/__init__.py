@@ -10,5 +10,5 @@ POSTGRES_ENGINE = 'postgresql://' + parser.get('postgres', 'username') + ':' + p
                   + '@' + parser.get('postgres', 'host') + ':' + parser.get('postgres', 'port') \
                   + '/' + parser.get('postgres', 'database')
 sys.path.append(parser.get('sys-path', 'exposures'))
-engine = create_engine(POSTGRES_ENGINE, pool_size=10, max_overflow=50)
+engine = create_engine(POSTGRES_ENGINE, pool_size=10, max_overflow=50, echo=True)
 Session = sessionmaker(bind=engine)
