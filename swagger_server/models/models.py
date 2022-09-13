@@ -3,6 +3,7 @@ from sqlalchemy import ARRAY, BigInteger, Boolean, CheckConstraint, Column, Floa
 from geoalchemy2.types import Geometry
 from sqlalchemy.dialects.postgresql.base import MONEY
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy_serializer import SerializerMixin
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -166,7 +167,8 @@ class SocioEconomicDatum(Base):
     estprobabilitynohealthins_se = Column(Float(53))
 
 
-class SocioEconomicData2019(Base):
+class SocioEconomicData2019(Base, SerializerMixin):
+
     __tablename__ = 'socio_economic_data_2019'
 
     id = Column(Integer, primary_key=True, server_default=text("nextval('socio_economic_data_2019_id_seq'::regclass)"))

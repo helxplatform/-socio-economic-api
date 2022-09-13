@@ -8,3 +8,4 @@ sqlalchemy
 geoalchemy2
 psycopg2
 pytz
+SQLAlchemy-serializer == 1.4.1

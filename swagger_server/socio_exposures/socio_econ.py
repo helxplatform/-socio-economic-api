@@ -1,7 +1,10 @@
 import sys
+import json
 from configparser import ConfigParser
 from datetime import datetime, timedelta
 from sqlalchemy import extract, func, cast
+from sqlalchemy import select
+from sqlalchemy import inspect
 from sqlalchemy.orm import load_only
 from geoalchemy2 import Geography
 import pytz
@@ -11,6 +14,10 @@ from swagger_server.socio_exposures.statics import Statics as s
 from swagger_server.controllers import Session
 from itertools import zip_longest as zip
 from enum import Enum
+from datetime import datetime
+from sqlalchemy.orm import class_mapper
+from sqlalchemy_serializer import SerializerMixin
+
 
 parser = ConfigParser()
 parser.read('swagger_server/ini/connexion.ini')
@@ -19,7 +26,7 @@ sys.path.append(parser.get('sys-path', 'controllers'))
 
 
 class MeasurementType(Enum):
-    # lat: 0 to +/- 90, lon: 0 to +/- 180 as lat,lon
+   # lat: 0 to +/- 90, lon: 0 to +/- 180 as lat,lon
 
     LATITUDE = '^[+-]?(([1-8]?[0-9])(\.[0-9]+)?|90(\.0+)?)$'
     LONGITUDE = '^[+-]?((([1-9]?[0-9]|1[0-7][0-9])(\.[0-9]+)?)|180(\.0+)?)$'
@@ -52,7 +59,7 @@ class SocioEconExposures(object):
             return False, msg
         else:
             return True, ''
- 
+
 
     def get_year_from_range(self, year_range):
 
@@ -85,7 +92,7 @@ class SocioEconExposures(object):
 
                 session.close()
 
-        else: 
+        else:
             census_obj_name = "CensusBlockGrps" + year
             census_obj = globals()[census_obj_name]
 
@@ -104,23 +111,19 @@ class SocioEconExposures(object):
                 geoid[year] = tmp_geoid
 
             session.close()
-  
+
         return geoid
 
 
-    def get_socio_econ_data(self, year, geoid):
+    def get_socio_econ_data(self, session, year, geoid):
 
-        session = Session()
         cols = s.Socio_Econ_Data_Columns[year].keys()
 
-        query = session.query(SocioEconomicData2019). \
-                                  options(load_only(*cols)). \
-                                  filter(SocioEconomicData2019.bgid2016.like("%" + geoid[year]))
-        result = session.execute(query, execution_options={"prebuffer_rows": True})
+        statement = select(SocioEconomicData2019).filter_by(bgid2016=geoid[year])
+        result = session.execute(statement)
 
-        session.close()
         return result
-        
+
 
     def get_values(self, **kwargs):
         # latitude, longitude, years
@@ -141,47 +144,96 @@ class SocioEconExposures(object):
 
         year = self.get_year_from_range(year_range)
         geoid = self.get_census_geoid(lat, lon, year)
-        
+
         data.update({'latitude': lat, 'longitude': lon})
 
+        session = Session(future=True)
         for year_key in geoid:
-            result = self.get_socio_econ_data(year_key, geoid)
+            result = self.get_socio_econ_data(session, year_key, geoid)
 
             for query_return_values in result:
+                print("result1")
 
                 # change any null values to 'n/a'
+                val_dict = {}
                 new_query_return_list = []
                 for val in query_return_values:
-                    print("val=",val)
                     if(val is None):
                         new_query_return_list.append("n/a")
                     else:
-                        new_query_return_list.append(val)
+                        val_dict = val.to_dict()
+                        new_query_return_list.append(val_dict)
+                        print("val_dict=")
+                        print(val_dict, flush=True)
+                        print("end val_dict.")
 
-                print("new_query_return_list=[", *new_query_return_list , "]", flush=True) 
+                print("new_query_return_list=")
+                print(*new_query_return_list, flush=True)
+                print("end new_query_return_list.")
+
+                # Create a dict from values of mapped static column values (as keys) and new_query_return_list (as values)
                 tmp_dict = {key: val for key, val in zip(s.Socio_Econ_Data_Columns[year_key].values(), new_query_return_list)}
                 print("tmp_dict:", flush=True)
-                dict_items = tmp_dict.items()
-                for item in dict_items:
-                    print(item, flush=True)
+                [print(key,':',value, flush=True) for key, value in tmp_dict.items()]
                 print("end tmp_dict.", flush=True)
 
-                # fix some things up ...
-                # get rid of the id
-                del tmp_dict["id"]
+                #tmp_dict currently looks like this based on above code:
+                # id : {
+                #        <2019 table data as dict>
+                #      }
+                # geoid : None
+                # EstTotalPopulation : None
+                # EstTotalPopulation_SE : None
+                # .
+                # .
+                # .
+                # EstPropMaleLittleWork : None
+
+                tmp_dict_2019 = tmp_dict.pop('id')
+                # new_tmp_dict now has
+                # {
+                #   <2019 table data as dict>
+                # }
+
+                print("tmp_dict_2019")
+                print(tmp_dict_2019)
+                print("end tmp_dict_2019")
+                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
+                print("short_tmp_dict=")
+                print(tmp_dict)
+                print("end short_tmp_dict.")
+
+                year_cols_dict = s.Socio_Econ_Data_Columns[year_key]
+                for k, v in tmp_dict_2019.items():
+                    try:
+                        if tmp_dict.__contains__(year_cols_dict[k]):
+                            tmp_dict[year_cols_dict[k]] = v
+                    except KeyError:
+                        pass
+
                 # change format of geoid
                 if tmp_dict["geoid"] is not None:
                     tmp_dict["geoid"] = '15000US' + tmp_dict["geoid"]
 
-                # add year range
+                # add year range ie reverse lookup year-range based on year sent in
                 for dkey, dvalue in s.Socio_Econ_Data_Years.items():
                     if(dvalue == year_key):
                         dict_key = dkey
                         break
                 tmp_dict.update({"years": dict_key})
+                print("printing updated tmp_dict", flush=True)
+                [print(key2,':',value2, flush=True) for key2, value2 in tmp_dict.items()]
+                print("end updated tmp_dict.", flush=True)
 
                 data['values'].append(tmp_dict)
 
+                print("printing data:")
+                print(*data["values"], flush=True)
+                print("end data.")
+
                 break
 
+        session.commit()
+        session.close()
         return jsonify(data)
