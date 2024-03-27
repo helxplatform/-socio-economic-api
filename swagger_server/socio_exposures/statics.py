@@ -2,7 +2,8 @@ class Statics(object):
 
     Socio_Econ_Data_Years = {
                 "2007-2011": "2011",
-                "2012-2016": "2016"
+                "2012-2016": "2016",
+                "2017-2021": "2021"
                }
 
     Socio_Econ_Data_Columns = {
@@ -53,5 +54,25 @@ class Statics(object):
                         "estprophouseholdssi_2016se": "EstPropHouseholdSSI_SE",
                         "estprophouseholdpa_2016": "EstPropHouseholdPA",
                         "estprophouseholdpa_2016se": "EstPropHouseholdPA_SE",
-                        "estpropmalelittlework_2016": "EstPropMaleLittleWork"}
+                        "estpropmalelittlework_2016": "EstPropMaleLittleWork"},
+                "2021": {"id": "id",
+                        "bgid2021": "geoid",
+                        "estpopulation_2021": "EstTotalPopulation",
+                        "estpropnonhispwhite_2021": "EstPropNonHispWhite",
+                        "estprophouseholdnonhispwhite_2021": "EstPropHouseholdNonHispWhite",
+                        "estresidentialdensity_2021": "EstResidentialDensity",
+                        "estmedianhouseholdincome_2021": "MedianHouseholdIncome",
+                        # "estprophighschoolmaxeducation_2021": "EstPropHighSchoolMaxEducation",
+                        # "estpropnoauto_2021": "EstPropHouseholdsNoAuto",
+                        # "estpropesl_2021": "EstPropPersons5PlusNoEnglish",
+                        "estpropnohealthins_2021": "EstPropPersonsNoHealthIns",
+                        "estpropfemalehouseholdnospouse_2021": "EstPropFemaleHouseholdNoSpouse",
+                        "estpropfemalehouseholdfamilychild_2021": "EstPropFemaleHouseholdFamilyChild",
+                        "estpropfemalehouseholdanychild_2021": "EstPropFemaleHouseholdAnyChild",
+                        # "estprophighschooldropout_2021": "EstPropHighSchoolDropout",
+                        # "estprophighschooldropoutnowork_2021": "EstPropHighSchoolDropoutNoWork",
+                        "estprophouseholdssi_2021": "EstPropHouseholdSSI",
+                        "estprophouseholdpa_2021": "EstPropHouseholdPA",
+                        # "estpropmalelittlework_2021": "EstPropMaleLittleWork"}
+                }
     }

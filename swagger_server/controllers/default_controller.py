@@ -28,9 +28,10 @@ def get_values(latitude, longitude, years):  # noqa: E501
     :param years: range of years for socio-econ data 
     :type years: str
     : enum:
-        - All (2007-2016)
+        - All (2007-2021)
         - 2007-2011
         - 2012-2016
+        - 2017-2021
 
     :rtype: InlineResponse200
     """

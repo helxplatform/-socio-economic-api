@@ -9,7 +9,7 @@ from sqlalchemy.orm import load_only
 from geoalchemy2 import Geography
 import pytz
 from flask import jsonify
-from swagger_server.models.models import SocioEconomicData2019, CensusBlockGrps2011, CensusBlockGrps2016
+from swagger_server.models.models import SocioEconomicData2019, CensusBlockGrps2011, CensusBlockGrps2016, CensusBlockGrps2021
 from swagger_server.socio_exposures.statics import Statics as s
 from swagger_server.controllers import Session
 from itertools import zip_longest as zip
@@ -144,7 +144,6 @@ class SocioEconExposures(object):
 
         year = self.get_year_from_range(year_range)
         geoid = self.get_census_geoid(lat, lon, year)
-
         data.update({'latitude': lat, 'longitude': lon})
 
         session = Session(future=True)
@@ -166,8 +165,8 @@ class SocioEconExposures(object):
                 # Create a dict from values of mapped static column values (as keys) and new_query_return_list (as values)
                 tmp_dict = {key: val for key, val in zip(s.Socio_Econ_Data_Columns[year_key].values(), new_query_return_list)}
                 tmp_dict_2019 = tmp_dict.pop('id')
-
                 year_cols_dict = s.Socio_Econ_Data_Columns[year_key]
+                print(13412340912384192308, tmp_dict, year_cols_dict)
                 for k, v in tmp_dict_2019.items():
                     try:
                         if tmp_dict.__contains__(year_cols_dict[k]):

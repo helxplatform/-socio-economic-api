@@ -69,6 +69,20 @@ info:
     - **EstPropFemaleHouseholdAnyChild** - proportion of the block group total households headed by a female with any children aged 18 or less (no male partner present)
     - **EstPropFemaleHouseholdAnyChild_SE** - standard error of proportion of the block group total households headed by a female with any children aged 18 or less (no male partner present)
 
+     **(2017-2021 data)**
+    - **YEARS** – the range of years for which this census data is valid
+    - **GEOID** – a FIPS like code for identifying which census block group this data pertains to, see (https://www.census.gov/geo/reference/geoidentifiers.html)
+    - **EstTotalPopulation** - estimated population count in block group
+    - **EstResidentialDensity** - block group population density
+    - **MedianHouseholdIncome** - estimated median household income
+    - **EstPropPersonsNoHealthIns** - proportion of the block group population with no health insurance
+    - **EstPropNonHispWhite** – proportion of the block group population that is non-Hispanic white
+    - **EstPropHouseholdSSI** - proportion of the block group households receiving Supplemental Security Income
+    - **EstPropHouseholdPA** - proportion of the block group households receiving Public Assistance
+    - **EstPropFemaleHouseholdNoSpouse** - proportion of the block group family households headed by a female (no male partner present)
+    - **EstPropFemaleHouseholdFamilyChild** - proportion of the block group family households headed by a female with related children aged 18 or under (no male partner present)
+    - **EstPropFemaleHouseholdAnyChild** - proportion of the block group total households headed by a female with any children aged 18 or less (no male partner present)
+    
     Locations are expressed using WGS84 decimal format. WGS84 is the World Geodetic System for expressing latitude and longitude. For example, Raleigh, North Carolina is at latitude 35.7796 and longitude -78.6382.
 
     Additional details on the data can be found in this documentation: (https://github.com/lstillwe/socio-economic-api/blob/master/docs/CensusData.md)
@@ -115,9 +129,10 @@ paths:
         schema:
           type: string
           enum:
-          - All (2007-2016)
+          - All (2007-2021)
           - 2007-2011
           - 2012-2016
+          - 2017-2021
       responses:
         200:
           description: OK
