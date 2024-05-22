@@ -1,5 +1,5 @@
 import sys
-
+import os
 from swagger_server.models.inline_response200 import InlineResponse200  # noqa: E501
 #from swagger_server.models.models import SocioEconomicDatum  # noqa: E501
 from swagger_server.models.models import SocioEconomicData2019  # noqa: E501
@@ -12,6 +12,11 @@ from flask import jsonify
 
 parser = ConfigParser()
 parser.read('swagger_server/ini/connexion.ini')
+parser.set("postgres", "host", os.environ.get("POSTGRES_HOST"))
+parser.set("postgres", "port", os.environ.get("POSTGRES_PORT"))
+parser.set("postgres", "database", os.environ.get("POSTGRES_DATABASE"))
+parser.set("postgres", "username", os.environ.get("POSTGRES_USERNAME"))
+parser.set("postgres", "password", os.environ.get("POSTGRES_PASSWORD"))
 sys.path.append(parser.get('sys-path', 'exposures'))
 sys.path.append(parser.get('sys-path', 'controllers'))
 
